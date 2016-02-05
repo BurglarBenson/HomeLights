@@ -4,6 +4,7 @@ import subprocess
 import time
 import datetime
 import csv
+import os
 
 
 # **********************************************************************************************************************
@@ -17,9 +18,17 @@ import csv
 
 def check_if_home(ip):
 
-    output = subprocess.Popen(["ping", "-c", "1", ip], stdout=subprocess.PIPE, shell=False)
-    check = output.communicate()[0]
-    check = output.returncode
+    if os.name == 'nt':
+
+        ping = subprocess.Popen(["ping", "-n", "1", ip], stdout=subprocess.PIPE)  # windows
+
+    else:
+
+        ping = subprocess.Popen(["ping", "-c", "1", ip], stdout=subprocess.PIPE, shell=False)  # linux
+
+
+    check = ping.communicate()[0]
+    check = ping.returncode
 
     return check
 
@@ -115,7 +124,7 @@ def rise_set_times():
 
 ip_address = "192.168.1.177"  # phone ip address to check
 
-sleepTime = 5  # time between end of one ping and the next (seconds)
+sleepTime = 1  # time between end of one ping and the next (seconds)
 absentTime = 20  # this is more how many times can it fail, quite a long time
 absentCheck = 0  # initialise this at zero to begin with
 
