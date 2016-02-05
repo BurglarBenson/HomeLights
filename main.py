@@ -19,7 +19,6 @@ def check_if_home(ip):
 
     output = subprocess.Popen(["ping", "-c", "1", ip], stdout=subprocess.PIPE, shell=False)
     check = output.communicate()[0]
-    del check
     check = output.returncode
 
     return check
