@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
+import csv
+import datetime
+import os
 import subprocess
 import time
-import datetime
-import csv
-import os
 
 
 # **********************************************************************************************************************
@@ -55,11 +55,17 @@ def lights_off():
 
 
 # get the day of the year - jan 1st is day zero
-# note: this is probably wrong in leap years...
 
-def get_day():
+def get_day(list_of_days):
 
-    day_num = datetime.datetime.now().timetuple().tm_yday
+    d_today = datetime.datetime.strptime(time.strftime("%d/%m/%y"), "%d/%m/%y").date()
+
+    day_num = None
+
+    for i in range(0, len(list_of_days)):  # this
+        if d_today == list_of_days[i]:
+            day_num = i
+            break
 
     return day_num
 
@@ -86,8 +92,11 @@ def check_if_dark(s_up, s_down, day_n):
         check = 0
 
     if check == 1:
+
         print('Dark outside')
+
     else:
+
         print('Light outside')
 
     return check  # returns a 1 if it is dark
@@ -107,13 +116,16 @@ def rise_set_times():
 
     sunrise = [None] * len(all_data)
     sunset = [None] * len(all_data)
+    days = [None] * len(all_data)
 
     for i in range(0, len(all_data)):
+
+        days[i] = datetime.datetime.strptime(all_data[i][0], "%d/%m/%y").date()
 
         sunrise[i] = datetime.datetime.strptime(all_data[i][1], "%H:%M:%S").time()
         sunset[i] = datetime.datetime.strptime(all_data[i][2], "%H:%M:%S").time()
 
-    return sunrise, sunset
+    return days, sunrise, sunset
 
 
 # **********************************************************************************************************************
@@ -128,7 +140,7 @@ sleepTime = 1  # time between end of one ping and the next (seconds)
 absentTime = 20  # this is more how many times can it fail, quite a long time
 absentCheck = 0  # initialise this at zero to begin with
 
-sSet, sRise = rise_set_times()
+dayList, sSet, sRise = rise_set_times()
 
 run = True  # continually run this script
 
@@ -143,7 +155,7 @@ try:
 
             print("Home")
 
-            darkCheck = check_if_dark(sSet, sRise, get_day())
+            darkCheck = check_if_dark(sSet, sRise, get_day(dayList))
 
         else:
 
