@@ -14,7 +14,7 @@ import time
 # **********************************************************************************************************************
 
 
-# checks if the ip address of the device is responding
+# checks if the ip address of the device is responding, returns a zero if responding
 
 def check_if_home(ip):
 
@@ -25,7 +25,6 @@ def check_if_home(ip):
     else:
 
         ping = subprocess.Popen(["ping", "-c", "1", ip], stdout=subprocess.PIPE, shell=False)  # linux
-
 
     check = ping.communicate()[0]
     check = ping.returncode
@@ -136,7 +135,7 @@ def rise_set_times():
 
 ip_address = "192.168.1.177"  # phone ip address to check
 
-sleepTime = 1  # time between end of one ping and the next (seconds)
+sleepTime = 5  # time between end of one ping and the next (seconds)
 absentTime = 20  # this is more how many times can it fail, quite a long time
 absentCheck = 0  # initialise this at zero to begin with
 
@@ -149,15 +148,7 @@ try:
 
         residentHome = check_if_home(ip_address)
 
-        if residentHome == 0:
-
-            absentCheck = 0  # reset this back to zero
-
-            print("Home")
-
-            darkCheck = check_if_dark(sSet, sRise, get_day(dayList))
-
-        else:
+        if residentHome != 0:
 
             if absentCheck > absentTime:
 
@@ -165,15 +156,21 @@ try:
 
                 lights_off()
 
-                print("Lights turned off")
-
             else:
 
                 absentCheck += 1  # add one each time until it reaches the threshold
 
                 print("Grace period")
 
-        print("*******************************************************************************************************")
+            continue
+
+        absentCheck = 0  # reset this back to zero
+
+        print("Home")
+
+        darkCheck = check_if_dark(sSet, sRise, get_day(dayList))
+
+        print("**********")
         time.sleep(sleepTime)
 
 except KeyboardInterrupt:
